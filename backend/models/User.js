@@ -1,6 +1,8 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const roles = ['Student', 'Teacher', 'University', 'Referral'];
+const roles = ["SuperAdmin", "SubAdmin", "Student", "Teacher", "University", "Referral"];
+const subAdminRoles = ["BlogManager", "FinanceManager", "CareerCell", "GovernanceBody"];
+const statuses = ["Pending", "Active", "Suspended", "Rejected"]; // you can expand as needed
 
 const userSchema = new mongoose.Schema(
   {
@@ -9,15 +11,13 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, required: true, unique: true, trim: true },
     passwordHash: { type: String, required: true },
     role: { type: String, enum: roles, required: true },
-
-    // Optional, depending on role:
-    universityCode: { type: String }, // Teacher
-    referralCode: { type: String },   // Referral
-    mouUrl: { type: String },         // University (uploaded file path)
-
-    isPhoneVerified: { type: Boolean, default: false }
+    subRole: { type: String, enum: subAdminRoles, required: function () { return this.role === "SubAdmin"; } },
+    universityCode: { type: String, required: function () { return this.role === "Teacher"; } },
+    referralCode: { type: String, required: function () { return this.role === "Referral"; } },
+    isPhoneVerified: { type: Boolean, default: false },
+    status: { type: String, enum: statuses, default: "Pending" }
   },
   { timestamps: true }
 );
 
-export default mongoose.model('User', userSchema);
+export default mongoose.model("User", userSchema);

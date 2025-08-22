@@ -218,6 +218,7 @@ export default function Signup({ role }) {
             <input type="file" accept=".pdf,.doc,.docx,.jpg,.png" onChange={(e) => setDoc(e.target.files[0])} />
           </div>
         )}
+     
         {role === "Referral" && (
           <input
             name="referralCode"
