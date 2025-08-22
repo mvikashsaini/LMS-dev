@@ -1,23 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { getStudents, getTeachers } from "../api/api";
+import { getStudents } from "../api/api";
 import UserManagementListDesign from "./UserManagementListDesign";
 
-export default function UserManagement({ role }) {
+export default function UserManagement() {
   const [userLists, setUserLists] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchUsers = async () => {
+  const fetchStudents = async () => {
     setLoading(true);
     try {
-      let response;
-      role === "Student" && (response = await getStudents());
-      role === "Teacher" && (response = await getTeachers());
-
-      const data = response?.data || [];
-      console.log(`${role}s from API:`, data);
+      const { data } = await getStudents(); // backend already filters role=Student
+      console.log("students from API:", data);
       setUserLists(data);
     } catch (err) {
-      console.error(`Failed to fetch ${role}s:`, err);
+      console.error("Failed to fetch students:", err);
       setUserLists([]);
     } finally {
       setLoading(false);
@@ -25,11 +21,11 @@ export default function UserManagement({ role }) {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, [role]);
+    fetchStudents();
+  }, []);
 
-  if (loading) return <div className="p-4">Loading {role}s...</div>;
-  if (!userLists.length) return <div className="p-4">No {role}s found</div>;
+  if (loading) return <div className="p-4">Loading students...</div>;
+  if (!userLists.length) return <div className="p-4">No students found</div>;
 
   return (
     <div>
