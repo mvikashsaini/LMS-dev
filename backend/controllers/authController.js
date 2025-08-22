@@ -21,7 +21,7 @@ export const validateRegister = [
   body('email').isEmail(),
   body('phone').isString().trim(),
   body('password').isString().isLength({ min: 6 }),
-  body('role').isIn(['Student', 'Teacher', 'University', 'Referral']),
+  body('role').isIn(['SuperAdmin', 'Student', 'Teacher', 'University', 'Referral']),
   body('universityCode').optional().isString(),
   body('referralCode').optional().isString(),
 ];
