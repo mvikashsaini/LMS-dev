@@ -11,7 +11,7 @@ export default function JoinAs() {
 
         {/* Role selection */}
         <h2 className="text-center font-semibold text-lg mb-4">Join as</h2>
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-4 mb-6">
           <button
             onClick={() => setSelectedRole("student")}
             className={`p-3 rounded-full border-2 ${
@@ -47,6 +47,16 @@ export default function JoinAs() {
           >
             Referral Partner
           </button>
+
+          {/* ✅ Super Admin button */}
+          <button
+            onClick={() => setSelectedRole("superadmin")}
+            className={`p-3 rounded-full border-2 ${
+              selectedRole === "superadmin" ? "bg-blue-500 text-white" : "hover:bg-gray-100"
+            }`}
+          >
+            Super Admin
+          </button>
         </div>
 
         {/* Display selected role content */}
@@ -55,29 +65,11 @@ export default function JoinAs() {
             <p className="text-gray-400">Display content according to selected card</p>
           )}
 
-          {selectedRole === "student" && (
-            <div className="text-gray-700 font-medium w-full">
-              <SignupForm role={"Student"}/>
-            </div>
-          )}
-
-          {selectedRole === "teacher" && (
-            <div className="text-gray-700 font-medium">
-              <SignupForm role={"Teacher"}/>
-            </div>
-          )}
-
-          {selectedRole === "university" && (
-            <div className="text-gray-700 font-medium">
-              <SignupForm role='University'/>
-            </div>
-          )}
-
-          {selectedRole === "referral" && (
-            <div className="text-gray-700 font-medium">
-              <SignupForm role="referral"/>
-            </div>
-          )}
+          {selectedRole === "student" && <SignupForm role="Student" />}
+          {selectedRole === "teacher" && <SignupForm role="Teacher" />}
+          {selectedRole === "university" && <SignupForm role="University" />}
+          {selectedRole === "referral" && <SignupForm role="Referral" />}
+          {selectedRole === "superadmin" && <SignupForm role="SuperAdmin" />}
         </div>
       </div>
     </div>
