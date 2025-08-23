@@ -1,54 +1,98 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { addUser, getSubAdmin, deleteUser, updateSubRole } from "../../api/api"; // ✅ added updateSubRole
 
 export default function UserRoleAccess() {
-  // Sample user data
-  const [users, setUsers] = useState([
-    { id: 1, name: "Vikash Saini", email: "vikash@lms.com", role: "Sub Admin", password: "12345" },
-    { id: 2, name: "Anjali Sharma", email: "anjali@lms.com", role: "Finance", password: "pass123" },
-    { id: 3, name: "Rahul Kumar", email: "rahul@lms.com", role: "Blog", password: "abc123" },
-  ]);
+  const [subAdmins, setSubAdmins] = useState([]);
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [editedSubRole, setEditedSubRole] = useState("");
 
-  // Available roles
-  const roles = ["Sub Admin", "Finance", "Governance", "Blog"];
+  // Only SubAdmin roles
+  const subAdminRoles = ["BlogManager", "FinanceManager", "CareerCell", "GovernanceBody", "SubAdmin"];
 
-  // Role access mapping
-  const roleAccess = {
-    "Sub Admin": ["Manage Users", "View Reports"],
-    Finance: ["Payments", "Invoices", "Reports"],
-    Governance: ["MOU Approval", "Policy Management"],
-    Blog: ["Add Blog", "Edit Blog", "Delete Blog"],
-  };
-
-  // Form states
   const [newUser, setNewUser] = useState({
-    name: "",
+    fullName: "",
     email: "",
-    phone : "",
+    phone: "",
     password: "",
-    role: "Sub Admin",
+    role: "SubAdmin", // ✅ Default role
+    subRole: "", // ✅ Required if SubAdmin
   });
 
-  // Handle role change
-  const handleRoleChange = (id, newRole) => {
-    setUsers(
-      users.map((user) =>
-        user.id === id ? { ...user, role: newRole } : user
-      )
-    );
-  };
+  // ✅ Fetch SubAdmins when component loads
+  useEffect(() => {
+    const fetchSubAdmins = async () => {
+      try {
+        const response = await getSubAdmin();
+        setSubAdmins(response.data || []);
+      } catch (err) {
+        console.error("Failed to fetch SubAdmins:", err);
+        setSubAdmins([]);
+      }
+    };
+
+    fetchSubAdmins();
+  }, []);
 
   // Add new user
-  const handleAddUser = () => {
-    if (!newUser.name || !newUser.email || !newUser.password) {
+  const handleAddUser = async () => {
+    if (!newUser.fullName || !newUser.email || !newUser.password || !newUser.phone) {
       alert("Please fill all fields!");
       return;
     }
-    setUsers([
-      ...users,
-      { id: users.length + 1, ...newUser },
-    ]);
-    // reset form
-    setNewUser({ name: "", email: "", password: "", role: "Sub Admin" });
+
+    if (newUser.role === "SubAdmin" && !newUser.subRole) {
+      alert("Please select a SubRole for SubAdmin!");
+      return;
+    }
+
+    try {
+      const res = await addUser(newUser);
+      setSubAdmins([...subAdmins, res.data.user]); // ✅ update list
+      setNewUser({
+        fullName: "",
+        email: "",
+        phone: "",
+        password: "",
+        role: "SubAdmin",
+        subRole: "",
+      });
+      alert("User added successfully!");
+    } catch (err) {
+      console.error("Add User Error:", err.response?.data || err.message);
+      alert(err.response?.data?.msg || "Failed to add user");
+    }
+  };
+
+  // ✅ Delete SubAdmin with confirmation
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm("Are you sure you want to delete this SubAdmin?")) return;
+
+    try {
+      await deleteUser(userId);
+      setSubAdmins(subAdmins.filter((user) => user._id !== userId));
+      alert("SubAdmin deleted successfully!");
+    } catch (err) {
+      console.error("Delete User Error:", err.response?.data || err.message);
+      alert(err.response?.data?.msg || "Failed to delete user");
+    }
+  };
+
+  // ✅ Save SubRole Update
+  const handleSaveSubRole = async (userId) => {
+    try {
+      await updateSubRole(userId, editedSubRole);
+      setSubAdmins(
+        subAdmins.map((u) =>
+          u._id === userId ? { ...u, subRole: editedSubRole } : u
+        )
+      );
+      setEditingUserId(null);
+      setEditedSubRole("");
+      alert("SubRole updated successfully!");
+    } catch (err) {
+      console.error("Update SubRole Error:", err.response?.data || err.message);
+      alert(err.response?.data?.msg || "Failed to update SubRole");
+    }
   };
 
   return (
@@ -62,8 +106,8 @@ export default function UserRoleAccess() {
           <input
             type="text"
             placeholder="Name"
-            value={newUser.name}
-            onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+            value={newUser.fullName}
+            onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
             className="border p-2 rounded flex-1"
           />
           <input
@@ -74,31 +118,32 @@ export default function UserRoleAccess() {
             className="border p-2 rounded flex-1"
           />
           <input
-  type="tel"
-  placeholder="1234567890"
-  value={newUser.phone}
-  onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-  className="border p-2 rounded flex-1"
-  pattern="[0-9]{10}"
-  title="Phone number must be 10 digits"
-/>
-     
-
+            type="tel"
+            placeholder="1234567890"
+            value={newUser.phone}
+            onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+            className="border p-2 rounded flex-1"
+            pattern="[0-9]{10}"
+            title="Phone number must be 10 digits"
+          />
           <input
             type="password"
             placeholder="Password"
             value={newUser.password}
             onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
             className="border p-2 rounded flex-1"
+            minLength={8}
+            required
           />
           <select
-            value={newUser.role}
-            onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+            value={newUser.subRole}
+            onChange={(e) => setNewUser({ ...newUser, subRole: e.target.value })}
             className="border p-2 rounded"
           >
-            {roles.map((role, idx) => (
-              <option key={idx} value={role}>
-                {role}
+            <option value="">Select Sub Role</option>
+            {subAdminRoles.map((sr, idx) => (
+              <option key={idx} value={sr}>
+                {sr}
               </option>
             ))}
           </select>
@@ -118,36 +163,73 @@ export default function UserRoleAccess() {
             <th className="p-3">Name</th>
             <th className="p-3">Email</th>
             <th className="p-3">Role</th>
-            <th className="p-3">Access</th>
+            <th className="p-3">SubRole</th>
+            <th className="p-3">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
-            <tr key={user.id} className="border-b hover:bg-gray-50">
-              <td className="p-3">{user.name}</td>
-              <td className="p-3">{user.email}</td>
+          {subAdmins.map((subAdmin) => (
+            <tr key={subAdmin._id} className="border-b hover:bg-gray-50">
+              <td className="p-3">{subAdmin.fullName}</td>
+              <td className="p-3">{subAdmin.email}</td>
+              <td className="p-3">{subAdmin.role}</td>
               <td className="p-3">
-                <select
-                  value={user.role}
-                  onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                  className="border p-1 rounded"
-                >
-                  {roles.map((role, idx) => (
-                    <option key={idx} value={role}>
-                      {role}
-                    </option>
-                  ))}
-                </select>
-              </td>
-              <td className="p-3 text-sm">
-                {roleAccess[user.role].map((access, index) => (
-                  <span
-                    key={index}
-                    className="inline-block bg-gray-200 text-gray-800 px-2 py-1 m-1 rounded text-xs"
+                {editingUserId === subAdmin._id ? (
+                  <select
+                    value={editedSubRole}
+                    onChange={(e) => setEditedSubRole(e.target.value)}
+                    className="border p-1 rounded"
                   >
-                    {access}
-                  </span>
-                ))}
+                    <option value="">Select Sub Role</option>
+                    {subAdminRoles.map((sr, idx) => (
+                      <option key={idx} value={sr}>
+                        {sr}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  subAdmin.subRole || (
+                    <span className="text-gray-400 italic">No SubRole</span>
+                  )
+                )}
+              </td>
+              <td className="p-3 flex gap-2">
+                {editingUserId === subAdmin._id ? (
+                  <>
+                    <button
+                      onClick={() => handleSaveSubRole(subAdmin._id)}
+                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingUserId(null);
+                        setEditedSubRole("");
+                      }}
+                      className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setEditingUserId(subAdmin._id);
+                      setEditedSubRole(subAdmin.subRole || "");
+                    }}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                  >
+                    Edit
+                  </button>
+                )}
+
+                <button
+                  onClick={() => handleDeleteUser(subAdmin._id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}

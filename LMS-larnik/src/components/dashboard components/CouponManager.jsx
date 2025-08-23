@@ -1,42 +1,79 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Trash2, Plus, ToggleLeft, ToggleRight } from "lucide-react";
+import {
+  createCoupon,
+  getCoupons,
+  updateCoupon,
+  deleteCoupon,
+} from "../../api/api"; // ✅ axios api.js
 
 export default function CouponManager() {
-  // Initial state
-  const [coupons, setCoupons] = useState([
-    { id: 1, code: "WELCOME10", discount: "10%", active: true },
-    { id: 2, code: "STUDENT20", discount: "20%", active: false },
-  ]);
-
+  const [coupons, setCoupons] = useState([]);
   const [newCode, setNewCode] = useState("");
   const [newDiscount, setNewDiscount] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
-  // Add new coupon
-  const addCoupon = () => {
+  // 🔹 Load coupons
+  useEffect(() => {
+    fetchCoupons();
+  }, []);
+
+  const fetchCoupons = async () => {
+    try {
+      const { data } = await getCoupons();
+      setCoupons(data);
+    } catch (error) {
+      console.error("Error fetching coupons:", error);
+    }
+  };
+
+  // 🔹 Add new coupon
+  const addCoupon = async () => {
     if (!newCode || !newDiscount) return alert("Fill all fields!");
-    const newCoupon = {
-      id: Date.now(),
-      code: newCode,
-      discount: newDiscount,
-      active: true, // default active
-    };
-    setCoupons([...coupons, newCoupon]);
-    setNewCode("");
-    setNewDiscount("");
+    try {
+      await createCoupon({
+        couponName: newCode,
+        discountType: newDiscount.includes("%") ? "percentage" : "amount",
+        discountValue: parseInt(newDiscount.replace("%", "")),
+        status: "active",
+      });
+      setNewCode("");
+      setNewDiscount("");
+      fetchCoupons();
+    } catch (error) {
+      alert("Error creating coupon: " + error.response?.data?.message);
+    }
   };
 
-  // Delete coupon
-  const deleteCoupon = (id) => {
-    setCoupons(coupons.filter((coupon) => coupon.id !== id));
+  // 🔹 Ask before delete
+  const confirmDelete = (id) => {
+    setDeleteId(id);
+    setShowConfirm(true);
   };
 
-  // Toggle active/inactive
-  const toggleCoupon = (id) => {
-    setCoupons(
-      coupons.map((coupon) =>
-        coupon.id === id ? { ...coupon, active: !coupon.active } : coupon
-      )
-    );
+  // 🔹 Delete coupon
+  const removeCoupon = async () => {
+    try {
+      await deleteCoupon(deleteId);
+      setShowConfirm(false);
+      setDeleteId(null);
+      fetchCoupons();
+    } catch (error) {
+      console.error("Error deleting coupon:", error);
+    }
+  };
+
+  // 🔹 Toggle Active/Inactive
+  const toggleCoupon = async (id, currentStatus) => {
+    try {
+      await updateCoupon(id, {
+        status: currentStatus === "active" ? "inactive" : "active",
+      });
+      fetchCoupons();
+    } catch (error) {
+      console.error("Error updating coupon:", error);
+    }
   };
 
   return (
@@ -56,7 +93,7 @@ export default function CouponManager() {
           />
           <input
             type="text"
-            placeholder="Discount (e.g. 20%)"
+            placeholder="Discount (e.g. 20% or 100)"
             value={newDiscount}
             onChange={(e) => setNewDiscount(e.target.value)}
             className="border p-2 rounded-lg w-1/2 focus:ring-2 focus:ring-green-400"
@@ -79,40 +116,42 @@ export default function CouponManager() {
           <div className="grid gap-4">
             {coupons.map((coupon) => (
               <div
-                key={coupon.id}
+                key={coupon._id}
                 className="flex justify-between items-center bg-white rounded-2xl shadow-lg border p-4 hover:shadow-xl transition"
               >
                 {/* Coupon Info */}
                 <div>
-                  <p className="font-bold text-lg">{coupon.code}</p>
+                  <p className="font-bold text-lg">{coupon.couponName}</p>
                   <p className="text-sm text-gray-500">
-                    Discount: {coupon.discount}
+                    {coupon.discountType === "percentage"
+                      ? `Discount: ${coupon.discountValue}%`
+                      : `Discount: ₹${coupon.discountValue}`}
                   </p>
                   <span
                     className={`mt-1 inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                      coupon.active
+                      coupon.status === "active"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {coupon.active ? "Active" : "Inactive"}
+                    {coupon.status}
                   </span>
                 </div>
 
                 {/* Actions */}
                 <div className="flex gap-3 items-center">
                   <button
-                    onClick={() => toggleCoupon(coupon.id)}
+                    onClick={() => toggleCoupon(coupon._id, coupon.status)}
                     className="text-blue-500 hover:text-blue-700"
                   >
-                    {coupon.active ? (
+                    {coupon.status === "active" ? (
                       <ToggleRight size={36} />
                     ) : (
                       <ToggleLeft size={36} />
                     )}
                   </button>
                   <button
-                    onClick={() => deleteCoupon(coupon.id)}
+                    onClick={() => confirmDelete(coupon._id)}
                     className="text-red-500 hover:text-red-700"
                   >
                     <Trash2 size={20} />
@@ -123,6 +162,32 @@ export default function CouponManager() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-6 w-96 shadow-lg">
+            <h3 className="text-lg font-semibold mb-4">Delete Coupon</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this coupon? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-4 py-2 rounded-lg border"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={removeCoupon}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

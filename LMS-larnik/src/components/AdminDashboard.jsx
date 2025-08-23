@@ -17,6 +17,7 @@ import UserRoleAccess from "./dashboard components/UserRoleAccess";
 import BlogManagerDashboard from "./dashboard components/BlogManagerDashboard";
 import Governance from "./dashboard components/Governance";
 import UserManagement from "./UserManagement";
+import StudentDashboardCards from "./cards/StudentDashboardCards";
 
 // Sidebar menu structure
 const menuItems = [
@@ -31,21 +32,13 @@ const menuItems = [
       { title: "University", icon: <Building2 size={16} /> },
       { title: "Referral Partners", icon: <UserPlus size={16} /> },
       { title: "Sub-Admins", icon: <Shield size={16} /> },
-      { title: "Partners", icon: <Handshake size={16} /> },
-      { title: "Career Cell", icon: <Briefcase size={16} /> },
-      { title: "Writers", icon: <PenTool size={16} /> },
-      { title: "Reviewers", icon: <CheckCircle size={16} /> },
+      // { title: "Partners", icon: <Handshake size={16} /> },
+      // { title: "Career Cell", icon: <Briefcase size={16} /> },
+      // { title: "Writers", icon: <PenTool size={16} /> },
+      // { title: "Reviewers", icon: <CheckCircle size={16} /> },
     ],
   },
   { title: "Course Management", icon: <BookOpen size={18} /> },
-  // {
-  //   title: "Monitoring",
-  //   icon: <Monitor size={18} />,
-  //   children: [
-  //     { title: "Course Monitoring", icon: <BarChart3 size={16} /> },
-  //     { title: "Content Monitoring", icon: <FileText size={16} /> },
-  //   ],
-  // },
   { title: "Notifications", icon: <Bell size={18} /> },
   { title: "Finance & Settlement", icon: <DollarSign size={18} /> },
   { title: "Certificate", icon: <Award size={18} /> },
@@ -390,62 +383,36 @@ export default function AdminDashboard () {
         
           {activeItem === "Students" && (
               <div className="flex w-full flex-col">
-                <div className="flex flex-row gap-5 w-[full]   p-5">
-                {studentCards.map((studentCard, index) => (
-                        <UserManagementCardDesign key={index} title={studentCard.title} subTitle={studentCard.subTitle} icon={studentCard.icon} value={studentCard.value} />
-                        ))}
-                </div>
-
                 <div className="flex flex-col gap-5 w-[98%]  bg-white p-5 rounded-2xl shadow-2xl">
-                  <div className="flex flex-col ">
-                    <div className="flex flex-row justify-between">
-
-                      <div className="flex flex-col items-start">
-                        <span className="font-bold">Students List</span>
-                        <span>View and manage all students on your platform</span>
-                      </div>
-
-                   
-
-                    </div>
-                    
-             
-                  </div>
-                <div className="bg-gray-200 flex justify-between items-center text-start p-2 font-bold">
-                  <span className="w-1/4">Name</span>
-                  <span className="w-1/6">Phone</span>
-                  <span className="w-1/12">Status</span>
-                  <span className="w-1/12">Courses</span>
-                  <span className="w-1/12">Actions</span>
-                </div>
-                {userLists.map((userList, index) => (
-                        <UserManagementListDesign key={index} name={userList.name} mail={userList.mail} phone={userList.phone} courses={userList.courses}  status_title={userList.status_title} status_colour={userList.status_colour}/>
-                        ))}
+                  <UserManagement role="Student"/>
               </div> 
-
-
               </div>
-      
           )}
         
           {activeItem === "Teachers" && (
             <>
             <div className="w-full">
-            <UserManagement role="Student"/>
+            <UserManagement role="Teachers"/>
             </div>
             </>
           )}
         
           {activeItem === "University" && (
-            <></>
+            <div className="w-full">
+              <UserManagement role="university"/>
+            </div>
           )}
         
           {activeItem === "Referral Partners" && (
-            <></>
+            <div className="w-full">
+              <UserManagement role="referral"/>
+            </div>
           )}
         
           {activeItem === "Sub-Admins" && (
-            <></>
+            <div className="w-full">
+              <UserManagement role="subadmin"/> 
+            </div>
           )}
         
           {activeItem === "Course Management" && (
