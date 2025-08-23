@@ -21,7 +21,7 @@ export const validateRegister = [
   body('email').isEmail(),
   body('phone').isString().trim(),
   body('password').isString().isLength({ min: 6 }),
-  body('role').isIn(['SuperAdmin', 'Student', 'Teacher', 'University', 'Referral']),
+  body('role').isIn(['SuperAdmin', 'Student', 'Teacher', 'University', 'Referral', "SubAdmin"]),
   body('universityCode').optional().isString(),
   body('referralCode').optional().isString(),
 ];
@@ -88,13 +88,6 @@ export async function register(req, res) {
   const exists = await User.findOne({ $or: [{ email }, { phone }] });
   if (exists) return res.status(409).json({ message: 'Email or phone already registered' });
 
-  // Role-specific requirement: University needs MoU file
-  let mouUrl;
-  if (role === 'University') {
-    if (!req.file) return res.status(400).json({ message: 'MoU document is required' });
-    mouUrl = `/${req.file.path.replace(/\\/g, '/')}`; // public path e.g. /uploads/mou/filename.pdf
-  }
-
   // Hash password
   const salt = await bcrypt.genSalt(10);
   const passwordHash = await bcrypt.hash(password, salt);
@@ -107,7 +100,7 @@ export async function register(req, res) {
     role,
     universityCode: role === 'Teacher' ? (universityCode || null) : undefined,
     referralCode: role === 'Referral' ? (referralCode || null) : undefined,
-    mouUrl,
+    // mouUrl,
     isPhoneVerified: true
   });
 
@@ -124,7 +117,7 @@ export async function register(req, res) {
       email: user.email,
       phone: user.phone,
       role: user.role,
-      mouUrl: user.mouUrl || null,
+      // mouUrl: user.mouUrl || null,
     }
   });
 }
@@ -152,7 +145,7 @@ export async function login(req, res) {
       email: user.email,
       phone: user.phone,
       role: user.role,
-      mouUrl: user.mouUrl || null,
+      // mouUrl: user.mouUrl || null,
     }
   });
 }

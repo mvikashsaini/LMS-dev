@@ -11,8 +11,8 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, required: true, unique: true, trim: true },
     passwordHash: { type: String, required: true },
     role: { type: String, enum: roles, required: true },
-    subRole: { type: String, enum: subAdminRoles, required: function () { return this.role === "SubAdmin"; } },
-    universityCode: { type: String, required: function () { return this.role === "Teacher"; } },
+    subRole: { type: String, enum: subAdminRoles, },
+    universityCode: { type: String},
     referralCode: { type: String, required: function () { return this.role === "Referral"; } },
     isPhoneVerified: { type: Boolean, default: false },
     status: { type: String, enum: statuses, default: "Pending" }
@@ -21,3 +21,5 @@ const userSchema = new mongoose.Schema(
 );
 
 export default mongoose.model("User", userSchema);
+
+// required: function () { return this.role === "SubAdmin"; } 
