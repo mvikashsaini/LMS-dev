@@ -1,6 +1,6 @@
 // controllers/userController.js
 // import User from "../models/Subadmin.js";
-import e from "express";
+import express from "express";
 import { roleAccess } from "../config/roleAccess.js";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
