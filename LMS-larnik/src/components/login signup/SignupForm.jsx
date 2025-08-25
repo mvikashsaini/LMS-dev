@@ -82,24 +82,13 @@ export default function Signup({ role }) {
     try {
       let res, data;
 
-      if (role === "University") {
-        const fd = new FormData();
-        fd.append("fullName", form.fullName);
-        fd.append("email", form.email);
-        fd.append("phone", form.phone);
-        fd.append("password", form.password);
-        fd.append("role", role);
-        if (doc) fd.append("mou", doc);
-
-        res = await fetch(`${API_BASE}/register`, { method: "POST", body: fd });
-      } else {
+      
         res = await fetch(`${API_BASE}/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...form, role }),
         });
-      }
-
+      
       data = await res.json();
       if (res.ok) {
         alert(`Account created ✅\nWelcome ${data.user.fullName}`);

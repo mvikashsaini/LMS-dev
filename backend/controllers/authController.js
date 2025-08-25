@@ -76,7 +76,7 @@ export async function register(req, res) {
   const v = validationResult(req);
   if (!v.isEmpty()) return res.status(400).json({ errors: v.array() });
 
-  const { fullName, email, phone, password, role, universityCode, referralCode } = req.body;
+  const { fullName, email, phone, password, role, referralCode } = req.body;
 
   // Must have verified OTP
   const otpDoc = await OtpCode.findOne({ phone });
@@ -98,7 +98,7 @@ export async function register(req, res) {
     phone,
     passwordHash,
     role,
-    universityCode: role === 'Teacher' ? (universityCode || null) : undefined,
+    // universityCode: role === 'Teacher' ? (universityCode || null) : undefined,
     referralCode: role === 'Referral' ? (referralCode || null) : undefined,
     // mouUrl,
     isPhoneVerified: true

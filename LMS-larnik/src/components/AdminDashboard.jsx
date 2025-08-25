@@ -18,6 +18,7 @@ import BlogManagerDashboard from "./dashboard components/BlogManagerDashboard";
 import Governance from "./dashboard components/Governance";
 import UserManagement from "./UserManagement";
 import StudentDashboardCards from "./cards/StudentDashboardCards";
+import UploadUniversityDoc from "./university components/UploadUniversityDoc";
 
 // Sidebar menu structure
 const menuItems = [
@@ -45,14 +46,7 @@ const menuItems = [
   { title: "Report", icon: <Notebook size={18} /> },
   { title: "Blog", icon: <Rss size={18} /> },
   { title: "Governance", icon: <Landmark size={18} /> },
-  // {
-  //   title: "Specialized",
-  //   icon: <Layers size={18} />,
-  //   children: [
-  //     { title: "Special 1", icon: <FileText size={16} /> },
-  //     { title: "Special 2", icon: <FileText size={16} /> },
-  //   ],
-  // },
+  { title: "doc uni", icon: <Landmark size={18} /> },
 ]
 
 const card = [
@@ -476,6 +470,11 @@ export default function AdminDashboard () {
           {activeItem === "Governance" && (
             <div className="w-full p-2">
               <Governance />
+            </div>
+          )}
+          {activeItem === "doc uni" && (
+            <div className="w-full p-2">
+              <UploadUniversityDoc />
             </div>
           )}
 
