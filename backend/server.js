@@ -10,6 +10,8 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from "./routes/userRoutes.js";
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 import couponRoutes from "./routes/couponRoutes.js";
+import universityRoutes from "./routes/universityRoutes.js";
+import universityDocumentRoutes from "./routes/universityDocumentRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,6 +35,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/coupons", couponRoutes);
+app.use("/api/university", universityRoutes);
+app.use("/api/university-documents", universityDocumentRoutes);
 
 // 404 + Error Handler
 app.use(notFound);

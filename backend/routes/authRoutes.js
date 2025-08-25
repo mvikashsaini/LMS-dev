@@ -8,7 +8,8 @@ router.post('/send-otp', validateSendOtp, sendOtp);
 router.post('/verify-otp', validateVerifyOtp, verifyOtp);
 
 // Role === "University" must send multipart/form-data with field name `mou`
-router.post('/register', uploadMou, validateRegister, register);
+// router.post('/register', uploadMou, validateRegister, register);
+router.post('/register',  validateRegister, register);
 
 router.post('/login', login);
 
